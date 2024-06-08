@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Calendar</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      td:hover {
+        background-color: #f2f2f2;
+      }
+
+      .prev,
+      .next {
+        cursor: pointer;
+      }
+
+      .today {
+        background-color: #ffff99;
+      }
+
+      .reminder {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border: 2px solid #ccc;
+        padding: 20px;
+        z-index: 1000;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Simple Calendar</h2>
+
+    <div id="calendar"></div>
+
+    <div id="reminder" class="reminder">
+      <h3>Add Reminder</h3>
+      <input type="text" id="reminderText" placeholder="Enter your reminder" />
+      <button onclick="saveReminder()">Save</button>
+      <button onclick="hideReminder()">Cancel</button>
+    </div>
+
+    <script>
+      function createCalendar(year, month) {
+        const calendarElement = document.getElementById("calendar");
+
+        const months = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentDay = currentDate.getDate();
+
+        const firstDay = new Date(year, month - 1, 1).getDay();
+        const lastDay = new Date(year, month, 0).getDate();
+
+        let calendarHTML = `<h3>${months[month - 1]} ${year}</h3>`;
+        calendarHTML += "<table>";
+        calendarHTML += "<tr>";
+        for (let day of days) {
+          calendarHTML += `<th>${day}</th>`;
+        }
+        calendarHTML += "</tr>";
+
+        let dayCount = 1;
+        for (let i = 0; i < 6; i++) {
+          calendarHTML += "<tr>";
+          for (let j = 0; j < 7; j++) {
+            if ((i === 0 && j < firstDay) || dayCount > lastDay) {
+              calendarHTML += "<td></td>";
+            } else {
+              if (
+                year === currentYear &&
+                month === currentMonth &&
+                dayCount === currentDay
+              ) {
+                calendarHTML += `<td class="today" ondblclick="showReminder(${year}, ${month}, ${dayCount})">${dayCount}</td>`;
+              } else {
+                calendarHTML += `<td ondblclick="showReminder(${year}, ${month}, ${dayCount})">${dayCount}</td>`;
+              }
+              dayCount++;
+            }
+          }
+          calendarHTML += "</tr>";
+        }
+
+        calendarHTML += "</table>";
+        calendarElement.innerHTML = calendarHTML;
+      }
+
+      const currentDate = new Date();
+      let currentYear = currentDate.getFullYear();
+      let currentMonth = currentDate.getMonth() + 1;
+      createCalendar(currentYear, currentMonth);
+
+      document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("prev")) {
+          currentMonth--;
+          if (currentMonth === 0) {
+            currentMonth = 12;
+            currentYear--;
+          }
+          createCalendar(currentYear, currentMonth);
+        } else if (event.target.classList.contains("next")) {
+          currentMonth++;
+          if (currentMonth === 13) {
+            currentMonth = 1;
+            currentYear++;
+          }
+          createCalendar(currentYear, currentMonth);
+        }
+      });
+
+      function showReminder(year, month, day) {
+        const reminderElement = document.getElementById("reminder");
+        reminderElement.style.display = "block";
+        const reminderText = localStorage.getItem(`${year}-${month}-${day}`);
+        document.getElementById("reminderText").value = reminderText || "";
+        document.getElementById("reminderText").focus();
+      }
+
+      function hideReminder() {
+        const reminderElement = document.getElementById("reminder");
+        reminderElement.style.display = "none";
+      }
+
+      function saveReminder() {
+        const reminderText = document.getElementById("reminderText").value;
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentDay = currentDate.getDate();
+        localStorage.setItem(
+          `${currentYear}-${currentMonth}-${currentDay}`,
+          reminderText
+        );
+        alert("Reminder saved: " + reminderText);
+        hideReminder();
+      }
+    </script>
+
+    <button class="prev" style="float: left">Previous Month</button>
+    <button class="next" style="float: right">Next Month</button>
+  </body>
+</html>
